@@ -1,0 +1,22 @@
+{
+  "name": "leaguebot",
+  "version": "0.0.1",
+  "description": "A League of Legends Discord Bot.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Youssof-lab/LeagueBot.git"
+  },
+  "author": "Youssof Abaza",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Youssof-lab/LeagueBot/issues"
+  },
+  "homepage": "https://github.com/Youssof-lab/LeagueBot#readme",
+  "dependencies": {
+    "discord.js": "^13.5.1"
+  }
+}
