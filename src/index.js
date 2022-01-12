@@ -3,7 +3,7 @@ require("dotenv").config();
 const Discord = require("discord.js");
 const config = require("./config.json");
 const logger = require("./util/Logger");
-// const eventHandler = require("./events");
+const eventHandler = require("./events");
 // const commandHandler = require("./commands");
 
 class LeagueBot extends Discord.Client {
@@ -11,16 +11,16 @@ class LeagueBot extends Discord.Client {
     super(clientOptions);
 
     this.discord = Discord;
-    // this.commands = new this.discord.Collection();
     this.slashCommands = new this.discord.Collection();
 
     this.config = config;
   }
+
   async start() {
     logger.info("Starting...");
-    // eventHandler.setup(this);
+    eventHandler.setup(this);
     // commandHandler.registerSlashCommands(this.slashCommands);
-    this.login(process.env.TOKEN).catch((err) => logger.error(err))
+    this.login(process.env.TOKEN).catch((err) => logger.error(err));
   }
 }
 
@@ -33,8 +33,8 @@ const bot = new LeagueBot({
     activities: [
       {
         name: `v${config.version}`,
-        type: "PLAYING"
-      }
+        type: "PLAYING",
+      },
     ],
   },
   intents: [
