@@ -4,7 +4,7 @@ const Discord = require("discord.js");
 const config = require("./config.json");
 const logger = require("./util/Logger");
 const eventHandler = require("./events");
-// const commandHandler = require("./commands");
+const commandHandler = require("./commands");
 
 class LeagueBot extends Discord.Client {
   constructor(clientOptions = {}) {
@@ -19,7 +19,7 @@ class LeagueBot extends Discord.Client {
   async start() {
     logger.info("Starting...");
     eventHandler.setup(this);
-    // commandHandler.registerSlashCommands(this.slashCommands);
+    commandHandler.registerSlashCommands(this.slashCommands);
     this.login(process.env.TOKEN).catch((err) => logger.error(err));
   }
 }

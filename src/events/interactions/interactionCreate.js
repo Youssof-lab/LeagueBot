@@ -20,7 +20,7 @@ class InteractionCreateEvent extends Event {
         await command.execute(bot, interaction);
       } catch (err) {
         // Log any errors and show a message reply visible only to the user
-        bot.logger.error(err);
+        this.logger.error(err);
         interaction.reply({
           content: this.responses.ERR_INTER_SOMETHING_WENT_WRONG,
           ephemeral: true,
