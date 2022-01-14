@@ -20,16 +20,16 @@ class MatchHistoryCommand extends Command {
 
     return {
       // Set up one string argument
-      data: new this.SlashCommandBuilder().setName(this.name).setDescription(this.description),
-      // .addStringOption((option) =>
-      //   option
-      //     .setName("gamemode")
-      //     .setDescription("The gamemode to search for.")
-      //     .setRequired(false)
+      data: new this.SlashCommandBuilder().setName(this.name).setDescription(this.description)
+       .addStringOption((option) =>
+         option
+           .setName("username")
+           .setDescription("The MatchHistory for.")
+           .setRequired(true)
       //     .addChoice("Ranked Solo/Duo", "ranked")
       //     .addChoice("Ranked Flex", "flex")
       //     .addChoice("ARAM", "aram"),
-      // ),
+       ),
       async execute(bot, interaction) {
         await runSlash(bot, interaction);
       },
@@ -38,6 +38,8 @@ class MatchHistoryCommand extends Command {
 
   async run(bot, interaction) {
     await interaction.deferReply({ ephemeral: false });
+
+    const userInput = interaction.options.getString("username");
 
     const startTime = performance.now();
     const queueInput = interaction.options.getString("gamemode");
@@ -48,7 +50,8 @@ class MatchHistoryCommand extends Command {
     wait(1000);
 
     try {
-      await riot.init("Youssof");
+      //await riot.init("Youssof");
+      await riot.init(userInput);
 
       // Get the last 10 matches
       const matchHistory = await riot.getMatchHistory(10, "ranked");
