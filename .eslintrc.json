@@ -10,8 +10,10 @@
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
   },
+  "parser": "@babel/eslint-parser",
   "parserOptions": {
-    "ecmaVersion": 2018
+    "ecmaVersion": 2018,
+    "requireConfigFile": false
   },
   "rules": {
     "no-console": "off",
@@ -45,6 +47,12 @@
           "runSlash"
         ]
       }
-    ]
+    ],
+    "implicit-arrow-linebreak": [
+      "error",
+      {
+        "beside": true
+      }
+    ],
   }
 }

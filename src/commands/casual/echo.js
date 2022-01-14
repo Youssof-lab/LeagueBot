@@ -17,8 +17,8 @@ class EchoCommand extends Command {
       data: new this.SlashCommandBuilder()
         .setName(this.name)
         .setDescription(this.description)
-        .addStringOption((option) => option.setName("input")
-          .setDescription("The text input to echo.").setRequired(true),
+        .addStringOption((option) =>
+          option.setName("input").setDescription("The text input to echo.").setRequired(true),
         ),
       async execute(bot, interaction) {
         await runSlash(bot, interaction);
