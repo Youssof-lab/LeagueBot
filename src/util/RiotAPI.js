@@ -1,4 +1,5 @@
 const axios = require("axios");
+const db = require("./Database");
 
 class RiotAPI {
   // https://static.developer.riotgames.com/docs/lol/queues.json
@@ -37,6 +38,10 @@ class RiotAPI {
         iconID: response.data.profileIconId,
         level: response.data.summonerLevel,
       };
+
+      db.insert("INSERT INTO accounts (username, encryptedID, puuid) VALUES(?, ?, ?)", 
+        this.summoner.username, this.summoner.encryptedID, this.summoner.puuid);
+
     } catch (e) {
       throw Error(`Summoner could not be fetched. ${e.message}`);
     }

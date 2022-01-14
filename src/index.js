@@ -3,6 +3,7 @@ require("dotenv").config();
 const Discord = require("discord.js");
 const config = require("./config.json");
 const logger = require("./util/Logger");
+const database = require("./util/Database");
 const eventHandler = require("./events");
 const commandHandler = require("./commands");
 
@@ -11,6 +12,7 @@ class LeagueBot extends Discord.Client {
     super(clientOptions);
 
     this.discord = Discord;
+    this.db = database.setup();
     this.slashCommands = new this.discord.Collection();
 
     this.config = config;
