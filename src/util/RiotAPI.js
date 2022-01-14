@@ -23,13 +23,13 @@ class RiotAPI {
   async init(username) {
     this.username = username;
 
-    const response = await axios.get(`${this.routes.platform + this.paths.summoner + this.username}`, {
-      params: {
-        api_key: process.env.RIOT_API_KEY,
-      },
-    });
+    try {
+      const response = await axios.get(`${this.routes.platform + this.paths.summoner + this.username}`, {
+        params: {
+          api_key: process.env.RIOT_API_KEY,
+        },
+      });
 
-    if (response.status === 200) {
       this.summoner = {
         username: response.data.name,
         encryptedID: response.data.id,
@@ -37,34 +37,29 @@ class RiotAPI {
         iconID: response.data.profileIconId,
         level: response.data.summonerLevel,
       };
+    } catch (e) {
+      throw Error(`Summoner could not be fetched. ${e.message}`);
     }
   }
 
   // Parse match history data and return the parsed out fields
   async getMatchHistory(count, queueType) {
     const matches = [];
-    if (!this.summoner) {
-      return { status: 400, data: "There was a problem accessing the Riot Games API." };
-    }
 
-    const games = await this.getMatchHistoryIDs(count, queueType);
+    try {
+      const games = await this.getMatchHistoryIDs(count, queueType);
 
-    if (games.status !== 200) {
-      return { status: 400, data: "There was a problem fetching Match History." };
-    }
+      // Loop through each game ID
+      for (const game of games) {
+        const matchIDPath = this.paths.matchSpecific.replace("{matchId}", game);
 
-    // Loop through each game ID
-    for (const game of games.data) {
-      const matchIDPath = this.paths.matchSpecific.replace("{matchId}", game);
+        // Fetch each game and find relevant data for the current summoner.
+        const response = await axios.get(`${this.routes.region + matchIDPath}`, {
+          params: {
+            api_key: process.env.RIOT_API_KEY,
+          },
+        });
 
-      // Fetch each game and find relevant data for the current summoner.
-      const response = await axios.get(`${this.routes.region + matchIDPath}`, {
-        params: {
-          api_key: process.env.RIOT_API_KEY,
-        },
-      });
-
-      if (response.status === 200) {
         for (const player of response.data.info.participants) {
           if (player.puuid === this.summoner.puuid) {
             matches.push({
@@ -78,34 +73,32 @@ class RiotAPI {
           }
         }
       }
+    } catch (e) {
+      throw Error(`Summoner could not be fetched. ${e.message}`);
     }
 
-    return { status: 200, data: matches };
+    return matches;
   }
 
   // Return an array of match history ID's
   async getMatchHistoryIDs(count, queueType) {
-    if (!this.summoner) {
-      return { status: 400, data: "There was a problem accessing the Riot Games API." };
-    }
-
     const matchHistoryPath = this.paths.matchHistory.replace("{puuid}", this.summoner.puuid);
 
-    const response = await axios.get(`${this.routes.region + matchHistoryPath}`, {
-      params: {
-        queue: this.queueIDs[queueType],
-        type: ["ranked", "flex"].includes(queueType) ? "ranked" : "normal",
-        start: 0,
-        count,
-        api_key: process.env.RIOT_API_KEY,
-      },
-    });
+    try {
+      const response = await axios.get(`${this.routes.region + matchHistoryPath}`, {
+        params: {
+          queue: this.queueIDs[queueType],
+          type: ["ranked", "flex"].includes(queueType) ? "ranked" : "normal",
+          start: 0,
+          count,
+          api_key: process.env.RIOT_API_KEY,
+        },
+      });
 
-    if (response.status !== 200) {
-      return { status: response.status, data: response.statusText };
+      return response.data;
+    } catch (e) {
+      throw e;
     }
-
-    return { status: response.status, data: response.data };
   }
 }
 

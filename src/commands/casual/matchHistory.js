@@ -1,12 +1,12 @@
 const { MessageEmbed, EmbedFooterData } = require("discord.js");
 const table = require("text-table");
 const wait = require("util").promisify(setTimeout);
-
 const Command = require("../Command");
 const RiotAPI = require("../../util/RiotAPI");
-const testdata = require("../../res/test.json");
+const logger = require("../../util/Logger");
+const helper = require("../../util/Helper");
 
-class TestCommand extends Command {
+class MatchHistoryCommand extends Command {
   constructor(...args) {
     super(...args, {
       name: "history",
@@ -38,46 +38,51 @@ class TestCommand extends Command {
 
   async run(bot, interaction) {
     await interaction.deferReply({ ephemeral: false });
+
     const startTime = performance.now();
     const queueInput = interaction.options.getString("gamemode");
+    const historyEmbed = new MessageEmbed();
     const riot = new RiotAPI();
+    let embedBody = [];
 
     wait(1000);
-    await riot.init("Youssof");
 
-    // Get the last 10 matches
-    const matchHistory = await riot.getMatchHistory(10, "ranked");
-    let formattedHistory = [];
+    try {
+      await riot.init("Youssof");
 
-    if (matchHistory.status !== 200) {
-      formattedHistory = matchHistory.data;
-    } else {
-      // Push all the relevant data we want into the array to be formatted
-      if (matchHistory.data.length > 0) {
-        matchHistory.data.forEach((match) => {
-          const kda = (match.kills + match.assists) / match.deaths;
-          formattedHistory.push([
+      // Get the last 10 matches
+      const matchHistory = await riot.getMatchHistory(10, "ranked");
+
+      if (matchHistory.length > 0) {
+        matchHistory.forEach((match) => {
+          let kda = ((match.kills + match.assists) / match.deaths).toFixed(2);
+          if (match.deaths === 0) kda = "⭐";
+
+          embedBody.push([
             match.win ? "✅" : "❌",
             `${match.championName}`,
             `${match.kills} / ${match.deaths} / ${match.assists}`,
             `Lvl ${match.champLevel}`,
-            `KDA ${kda.toFixed(2)}`,
+            `KDA ${kda}`,
           ]);
         });
+        embedBody = helper.codeBlock("css", table(embedBody));
+        historyEmbed.setColor("YELLOW").setTitle(`${riot.username}'s Last 10 Games`);
       } else {
-        formattedHistory.push();
+        embedBody = "No games found in match history or something went wrong while trying to fetch them.";
+        historyEmbed.setColor("DARK_RED").setTitle(`❌ Error`);
       }
+    } catch (e) {
+      logger.error(e);
+      embedBody = "An error occured while trying to process your request.";
+      historyEmbed.setColor("DARK_RED").setTitle(`❌ Error`);
     }
 
     const completeTime = ((performance.now() - startTime) / 1000).toFixed(2);
-    const historyEmbed = new MessageEmbed()
-      .setTitle(`Youssof's Last 10 games`)
-      .setColor("YELLOW")
-      .setDescription("```css\n" + table(formattedHistory) + "```")
-      .setFooter({ text: `Completed in ${completeTime}s.` });
+    historyEmbed.setDescription(`${embedBody}`).setFooter({ text: `Completed in ${completeTime}s.` });
 
     await interaction.editReply({ embeds: [historyEmbed], ephemeral: false });
   }
 }
 
-module.exports = new TestCommand();
+module.exports = new MatchHistoryCommand();
